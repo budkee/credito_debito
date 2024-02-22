@@ -5,7 +5,7 @@ FROM python:3.9-slim
 COPY shardB.py .
 
 # Instale as dependências necessárias
-RUN pip install queue
+RUN pip install --upgrade pip
 
 # Comando a ser executado quando o contêiner for iniciado
 CMD ["python", "./shardB.py"]

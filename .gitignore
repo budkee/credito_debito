@@ -1,0 +1,15 @@
+# Arquivos de compilação, como .pyc
+*.pyc
+
+# Arquivos de cache do ambiente virtual
+__pycache__/
+
+# Diretório do ambiente virtual
+venv/
+
+# Arquivo de saída do debugger
+.vscode/
+
+# Logs e arquivos de debug
+*.log
+*.log.*

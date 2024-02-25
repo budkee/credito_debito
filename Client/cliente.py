@@ -1,16 +1,13 @@
 import queue
+import socket
+import json
 
-# Classe para o componente Cliente
 class Client:
-
-    # Construtor de inicialização do objeto
     def __init__(self):
         self.queue = queue.Queue()
+        self.saldo = 0.0 
 
-    # Operação de solicitação
     def OpClient(self, data_operacao, conta_cliente, tipo, valor_operacao):
-        
-        # Organização dos dados de interesse
         request_transacao = {
             "data_operacao": data_operacao,
             "conta_cliente": conta_cliente,
@@ -18,22 +15,67 @@ class Client:
             "valor_operacao": valor_operacao
         }
 
+        # Coloca a requisição na fila
         self.queue.put(request_transacao)
 
-        # Tente esperar a resposta da fila
+    def atualizar_saldo(self, tipo, valor_operacao):
+        if tipo == 'C':
+            self.saldo += valor_operacao
+        elif tipo == 'D':
+            self.saldo -= valor_operacao
+
+    def get_saldo(self):
+        return self.saldo
+
+def main():
+    host = 'localhost'
+    port = 5000
+
+    client = Client()
+
+    # Loop para processar transações na fila continuamente
+    while True:
+
+        print(f"Saldo atual: {client.get_saldo()}")
+        # Chama o método OpClient do Cliente
+        data_operacao = input("Data operação: ")  # Input fornecido pelo usuário para exemplo, você pode obter esses dados de outra forma
+        conta_cliente = input("Conta cliente: ")
+        tipo = input("Tipo (C ou D): ")
+        valor_operacao = float(input("Valor operação: "))
+
+        client.OpClient(data_operacao, conta_cliente, tipo, valor_operacao)
+
         try:
-            # Espere a resposta em até 5 segundos
-            response = self.queue.get(timeout=5) 
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-            # Retorno da resposta ao Cliente
-            if response == "OK":
-                print("Transação concluída com sucesso")
-            else:
-                print("Transação falhou")
-        # Caso a fila esteja vazia 
-        except queue.Empty:
-            print("Timeout: Servidor não respondeu a tempo")
+            client_socket.connect((host, port))
 
-# Exemplo de uso do Client
-client = Client()
-client.OpClient("21/02/2024", "123456", "C", 100)
+            next_transaction = client.queue.get()
+
+            request = json.dumps({
+                'operation': 'OpClient',
+                'data': next_transaction['data_operacao'],
+                'conta_cliente': next_transaction['conta_cliente'],
+                'type': next_transaction['tipo'],
+                'value': next_transaction['valor_operacao']
+            })
+            client_socket.send(request.encode())
+
+            #--------------------------resposta
+            response = client_socket.recv(1024).decode()
+            print(response)
+
+
+            # se a respota do coordenador for ok então atualiza o saldo de acordo com a operação
+            if response == "OK":   
+                client.atualizar_saldo(next_transaction['tipo'], next_transaction['valor_operacao'])
+                print(f"Saldo atualizado: {client.get_saldo()}")
+
+        except socket.error as e:
+            print(f"Erro de comunicação com o servidor: {e}")
+
+        finally:
+            client_socket.close()
+
+if __name__ == "__main__":
+    main()

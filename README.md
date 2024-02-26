@@ -13,10 +13,12 @@
 
 1. Escreva o código a ser executado por cada componente utilizando a política First In First Out (FIFO).
 
-    - [Código | Cliente](./Client/cliente.py)
-    - [Código | Coordenador da Transação](./CoordTrans/coord.py)
-    - [Código | ShardA](./ShardA/shardA.py)
-    - [Código | ShardB](./ShardB/shardB.py)
+    - [Código | Cliente](./cliente.py)
+    - [Código | Coordenador da Transação](./coord.py)
+    - [Código | ShardA](./shardA.py)
+    - [Código | ShardB](./shardB.py)
+
+### Docker
 
 2. Para implementação do sistema em questão, serão criados um container para cada componente pela plataforma Docker.
 
@@ -28,5 +30,3 @@
 2.1 Dentro do diretório de cada componente, construa as imagens criadas no Dockerfile.
 
     docker build -t nome-image -f Dockerfile.nome .
-
-

@@ -8,7 +8,7 @@ def debito(data_operacao, conta_cliente, valor_operacao):
     return json.dumps(resposta_data)
 
 def start_shard_b():
-    # Shard B configuration
+    # Shard B configuracao
     shard_b_host = '192.168.0.42'  
     shard_b_port = 8889  
 

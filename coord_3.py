@@ -40,7 +40,7 @@ def handle_client(client_socket):
 
 def start_server():
     # Endereço e porta em que o servidor vai ouvir
-    host = '192.168.0.40'
+    host = 'localhost'
     port = 9999
 
     # Cria um socket TCP/IP

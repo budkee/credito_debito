@@ -18,7 +18,7 @@ import time
 
 # Configurações do programa
 ## Configurações do servidor
-HOST = '0.0.0.0'  # Escuta em todas as interfaces de rede
+HOST = '192.168.0.40'  # '0.0.0.0' Escuta em todas as interfaces de rede
 PORT = 7777       # Porta que o servidor vai escutar
 max_connections = 5
 
@@ -32,6 +32,9 @@ def handle_clients_and_servers(client_sockets, server_sockets):
     print("Servidor iniciado. \n\nAguardando conexões...")
 
     while True:
+
+        
+
         # Lista de sockets para seleção
         sockets_list = client_sockets + server_sockets
 
@@ -39,9 +42,13 @@ def handle_clients_and_servers(client_sockets, server_sockets):
         read_sockets, _, _ = select.select(sockets_list, [], [])
 
         for sock in read_sockets:
+            
+            
             # Se for um novo cliente se conectando
             if sock in client_sockets:
+
                 client_socket, client_address = sock.accept()
+                
                 print(f"Novo cliente conectado: {client_address}")
                 client_sockets.append(client_socket)
 
@@ -49,17 +56,20 @@ def handle_clients_and_servers(client_sockets, server_sockets):
                 client_thread = threading.Thread(target=handle_client, args=(client_socket, client_sockets))
                 client_thread.daemon = True
                 client_thread.start()
+                #client_thread.join()
 
             # Se for um cliente existente enviando mensagem
             else:
                 try:
                     data = sock.recv(1024)
+                    
                     if data:
                         print(f"Mensagem recebida de {sock.getpeername()}: {data.decode()}")
                         # Aqui você pode processar a mensagem ou encaminhá-la para servidores, etc.
                         # Vamos apenas responder para o exemplo
                         response = b"Recebido pelo servidor: " + data
                         sock.sendall(response)
+
                     else:
                         print(f"Cliente {sock.getpeername()} desconectado")
                         sock.close()
@@ -96,7 +106,12 @@ def handle_client(client_socket, client_sockets):
     """
 
     while True:
+        
+        # Aceitar a conexão do cliente
+        client_socket, client_address = client_sockets.accept()
+
         try:
+
             data = client_socket.recv(1024)
             if not data:
                 print(f"Cliente {client_socket.getpeername()} desconectado")
@@ -167,15 +182,16 @@ def tratar_solicitacoes():
 
 # 1. Estabelecer a conexão em rede para clientes e servidores via socket;
 
-# 1.1. Criando os sockets
+# 1.1. Listas de sockets de clientes e servidores
+client_sockets = []
+server_sockets = [server_socket]
+
+# 1.2. Criando os sockets
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind((HOST, PORT))
 server_socket.listen(max_connections)
 
-# 1.2. Listas de sockets de clientes e servidores
-client_sockets = []
-server_sockets = [server_socket]
 
 # 2. Lidar com a solicitação de n-clientes e n-servidores
 # 2.1. Iniciando a thread para lidar com clientes e servidores
@@ -188,6 +204,8 @@ while server_running:
 
     # Entrada cliente
     comando = input("\nDigite 'encerrar o servidor' para fechar o servidor: ")
+
+
 
     if comando.lower() == "encerrar o servidor":
         print("Encerrando servidor...")

@@ -8,6 +8,7 @@ class Client:
         self.saldo = 0.0 
 
     def OpClient(self, data_operacao, conta_cliente, tipo, valor_operacao):
+        
         request_transacao = {
             "data_operacao": data_operacao,
             "conta_cliente": conta_cliente,
@@ -28,23 +29,31 @@ class Client:
         return self.saldo
 
 def main():
-    host = 'localhost'
-    port = 5000
+    
+    host = '192.168.0.40'
+    port = 9999
 
     client = Client()
 
     # Loop para processar transações na fila continuamente
     while True:
-
+        
         print(f"Saldo atual: {client.get_saldo()}")
+
+        # Sugestão de implementação: Menu de opções ao usuário, para dar opção de (1) realizar uma nova transação e (2) encerrar a conexão;
+
         # Chama o método OpClient do Cliente
         data_operacao = input("Data operação: ")  # Input fornecido pelo usuário para exemplo, você pode obter esses dados de outra forma
+        
         conta_cliente = input("Conta cliente: ")
+        
         tipo = input("Tipo (C ou D): ")
+        
         valor_operacao = float(input("Valor operação: "))
 
-        client.OpClient(data_operacao, conta_cliente, tipo, valor_operacao)
 
+        client.OpClient(data_operacao, conta_cliente, tipo, valor_operacao)
+        
         try:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -59,12 +68,13 @@ def main():
                 'type': next_transaction['tipo'],
                 'value': next_transaction['valor_operacao']
             })
+
             client_socket.send(request.encode())
 
             #--------------------------resposta
             response = client_socket.recv(1024).decode()
+            
             print(response)
-
 
             # se a respota do coordenador for ok então atualiza o saldo de acordo com a operação
             if response == "OK":   

@@ -1,4 +1,3 @@
-# shard_a.py
 import socket
 import json
 

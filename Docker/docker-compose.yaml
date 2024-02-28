@@ -13,7 +13,7 @@ services:
     volumes:
       - ./Client:/Client
     deploy:
-      replicas: 1
+      replicas: 4
 
   coordenador:
 

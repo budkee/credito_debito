@@ -38,8 +38,8 @@ def shard_b():
     shard_b_instancia = ShardB()
 
     shard_b_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    shard_a_socket.bind((host, shard_a_port))
-    shard_a_socket.listen()
+    shard_b_socket.bind((host, shard_b_port))
+    shard_b_socket.listen()
 
     print(f"[*] Shard B comunicando-se em: {shard_b_host}:{shard_b_port}")
 

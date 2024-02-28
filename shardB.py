@@ -27,7 +27,7 @@ class ShardB:
         except Exception as e:
             resposta_data["status"] = f"Erro ao processar débito: {str(e)}"
 
-        return json.dumps(resposta_data) # Retornando valor atualizado da conta
+        return json.dumps(resposta_data)  # Retornando valor atualizado da conta
 
 def shard_b():
     # lendo ip do coordenator
@@ -50,21 +50,16 @@ def shard_b():
 
         try:
             data = json.loads(request)
-            if "operacao" in data and data["operacao"] == "D":
-                data_operacao = data["data"]
-                conta_cliente = data["conta_cliente"]
-                valor_operacao = data["value"]
+            data_operacao = data["data"]
+            conta_cliente = data["conta_cliente"]
+            valor_operacao = data["value"]
 
-                # enviando resposta para coordenador
-                resposta = shard_b_instancia.debito(data_operacao, conta_cliente, valor_operacao)
-                coordenador_socket.send(resposta.encode('utf-8'))
-            else:
-                # Operação Inválida
-                coordenador_socket.send("Operação Inválida".encode('utf-8'))
+            # Sem verificação de operação, sempre realiza a operação de débito
+            resposta = shard_b_instancia.debito(data_operacao, conta_cliente, valor_operacao)
+            coordenador_socket.send(resposta.encode('utf-8'))
         except json.JSONDecodeError as e:
             # Erro de decodificação JSON
             coordenador_socket.send(f"Possível erro de comunicação com Server: {str(e)}")
-        
         finally:
             coordenador_socket.close()
 

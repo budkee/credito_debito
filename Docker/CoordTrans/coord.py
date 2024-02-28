@@ -1,12 +1,41 @@
 import socket
 import threading
+import queue
 import json
+
+
+class Client:
+    def __init__(self):
+        self.queue = queue.Queue()
+        self.saldo = 0.0 
+
+    def OpClient(self, data_operacao, conta_cliente, tipo, valor_operacao):
+        
+        request_transacao = {
+            "data_operacao": data_operacao,
+            "conta_cliente": conta_cliente,
+            "tipo": tipo,
+            "valor_operacao": valor_operacao
+        }
+
+        # Coloca a requisição na fila
+        self.queue.put(request_transacao)
+
+    def atualizar_saldo(self, tipo, valor_operacao):
+        if tipo == 'C':
+            self.saldo += valor_operacao
+        elif tipo == 'D':
+            self.saldo -= valor_operacao
+
+    def get_saldo(self):
+        return self.saldo
 
 
 def start_server():
     # Endereço e porta em que o servidor vai ouvir
-    host = 'localhost'
+    host = '0.0.0.0'
     port = 9999
+    port_shardA = 8888
 
     # Cria um socket TCP/IP
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -14,8 +43,8 @@ def start_server():
     # Associa o socket com o endereço e porta
     server_socket.bind((host, port))
 
-    # Define o limite máximo de conexões pendentes
-    server_socket.listen(5)
+    # Escuta
+    server_socket.listen()
 
     print(f"[*] Servidor escutando em {host}:{port}")
 
@@ -30,6 +59,8 @@ def start_server():
         client_handler.start()
 
 
+
+
 def handle_client(client_socket):
     
     # Recebe dados do cliente
@@ -41,13 +72,14 @@ def handle_client(client_socket):
     # Trata a mensagem 
     try:
         data = json.loads(request)
+        
         if "operation" in data and data["operation"] == "OpClient":
             
             # Extrai os dados relevantes
             client_data = {
                 "data": data["data"],
                 "conta_cliente": data["conta_cliente"],
-                "type": data["type"],
+                "tipo": data["tipo"],
                 "value": data["value"]
             }
 
@@ -56,7 +88,12 @@ def handle_client(client_socket):
                 json.dump(client_data, json_file)
                 json_file.write("\n")
 
-            response = "OK"
+            if response == "OK":   
+                client.atualizar_saldo(next_transaction['tipo'], next_transaction['valor_operacao'])
+                print(f"Saldo atualizado: {client.get_saldo()}")
+
+            # Após receber os dados do shard correspondente
+            #response = "OK"
         else:
             response = "Operação não suportada."
     except json.JSONDecodeError:

@@ -1,0 +1,57 @@
+version: '3'
+services:
+  
+  cliente:
+    
+    build:
+      context: ./Client
+      dockerfile: Dockerfile
+    networks:
+      - mynetwork
+    depends_on:
+      - coordenador
+    volumes:
+      - ./Client:/Client
+    deploy:
+      replicas: 1
+
+  coordenador:
+
+    build: 
+      context: ./CoordTrans
+      dockerfile: Dockerfile
+    
+    volumes:
+      - ./CoordTrans:/CoordTrans
+    networks:
+      - mynetwork
+
+  shard_a:
+
+    build: 
+      context: ./ShardA
+      dockerfile: Dockerfile
+    
+    volumes:
+      - ./ShardA:/ShardA
+    networks:
+      - mynetwork
+    depends_on:
+      - coordenador
+
+  shard_b:
+
+    build: 
+      context: ./ShardB
+      dockerfile: Dockerfile
+    
+    volumes:
+      - ./ShardB:/ShardB
+    networks:
+      - mynetwork
+    depends_on:
+      - coordenador
+    
+networks:
+
+  mynetwork:

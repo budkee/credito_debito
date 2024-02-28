@@ -23,49 +23,6 @@ class ShardA:
         return json.dumps(resposta_data) #retorna valor atualizado da conta
 
 
-def handle_client(client_socket):
-    
-    # Recebe dados do cliente
-    request = client_socket.recv(1024).decode('utf-8')
-
-    # Fila de clientes e identificação por ordem de chegada
-    print(f"Dados recebidos do cliente[i]: {request}")
-
-    # Trata a mensagem 
-    try:
-        data = json.loads(request)
-        if "operation" in data and data["operation"] == "OpClient":
-            
-            # Extrai os dados relevantes
-            client_data = {
-                "data": data["data"],
-                "conta_cliente": data["conta_cliente"],
-                "type": data["type"],
-                "value": data["value"]
-            }
-
-            # Armazena os dados em um arquivo JSON
-            with open("client_data.json", "a") as json_file:
-                json.dump(client_data, json_file)
-                json_file.write("\n")
-
-            if response == "OK":   
-                client.atualizar_saldo(next_transaction['tipo'], next_transaction['valor_operacao'])
-                print(f"Saldo atualizado: {client.get_saldo()}")
-
-            # Após receber os dados do shard correspondente
-            #response = "OK"
-        else:
-            response = "Operação não suportada."
-    except json.JSONDecodeError:
-        response = "Erro ao decodificar JSON."
-
-    # Envia resposta de volta para o cliente
-    client_socket.send(response.encode('utf-8'))
-
-    # Fecha a conexão com o cliente
-    client_socket.close()
-
 
 def shard_a():
     # lendo ip do coordenator
@@ -88,13 +45,8 @@ def shard_a():
         coordenador_socket, addr = shard_a_socket.accept()
         print(f"[*] Conexão aceita {addr}")
 
-        # Cria a thread para lidar com as requisições do coordenador
-        
-        # Cria uma thread para lidar com o cliente
-        client_handler = threading.Thread(target=handle_client, args=(coordenador_socket,))
-        client_handler.start()
-        
-        #request = coordenador_socket.recv(1024).decode('utf-8')
+       
+        request = coordenador_socket.recv(1024).decode('utf-8')
 
         try:
             data = json.loads(request)

@@ -48,7 +48,6 @@ def handle_client(client_socket, client):
             print(f"Saldo atualizado: {client.get_saldo()}")
     except json.JSONDecodeError:
         response = "Erro ao decodificar JSON."
-
     client_socket.send(response.encode('utf-8'))
     client_socket.close()
 

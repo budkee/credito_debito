@@ -1,68 +1,45 @@
+import threading
 import socket
 import json
-import queue
 
-class ShardB:
-    def __init__(self):
-        self.queue = queue.Queue()
-        self.saldo = 5000 
 
-    def debito(self, data_operacao, conta_cliente, valor_operacao):
-        resposta_data = {}
+def handle_request(client_socket, address):
+    # Recebe os dados do coordenador
+    data = client_socket.recv(1024).decode()
+    request = json.loads(data)
+    
+    # Puxa os dados de interesse
+    tipo_operacao = request["tipo_operacao"]
+    valor_operacao = request["valor_operacao"]
+    
+    # Simulação de operação de débito
+    saldo_atualizado = 1000 - valor_operacao
+    
+    # Retorna pro coordenador
+    response = f"OK!\n Saldo atualizado: {saldo_atualizado}"
+    client_socket.send(json.dumps(response).encode())
+    client_socket.close()
+
+
+def shard_b(host, port):
+    
+    # Conexão por streamming
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.bind((host, port))
+        server_socket.listen()
+        print("Servidor shardB escutando em", (host, port))
         
-        try:
-            if valor_operacao > self.saldo:
-                resposta_data["status"] = "Saldo insuficiente"
-            else:
-                self.saldo -= valor_operacao
-                valores_debito = self.saldo
+        while True:
+            client_socket, address = server_socket.accept()
+            print(f"[*] Conexão estabelecida com {address[0]}:{address[1]}")
+            client_thread = threading.Thread(target=handle_request, args=(client_socket, address))
+            client_thread.start()
 
-                resposta_data = {
-                    "status": "OK",
-                    "novo_valor_debito": valores_debito
-                }
-
-                self.queue.put(resposta_data)
-        
-        except Exception as e:
-            resposta_data["status"] = f"Erro ao processar débito: {str(e)}"
-
-        return json.dumps(resposta_data)  # Retornando valor atualizado da conta
-
-def shard_b():
-    # lendo ip do coordenator
-    host = 'coordenador'
-    shard_b_host = '0.0.0.0'  
-    shard_b_port = 8889  
-
-    shard_b_instancia = ShardB()
-
-    shard_b_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    shard_b_socket.bind((host, shard_b_port))
-    shard_b_socket.listen()
-
-    print(f"[*] Shard B comunicando-se em: {shard_b_host}:{shard_b_port}")
-
-    while True:
-        # Recebendo conexão do Coordenador
-        coordenador_socket, addr = shard_b_socket.accept()
-        print(f"[*] Conexão aceita {addr[0]}:{addr[1]}")
-
-        request = coordenador_socket.recv(1024).decode('utf-8')
-
-        try:
-            data = json.loads(request)
-            data_operacao = data["data"]
-            conta_cliente = data["conta_cliente"]
-            valor_operacao = data["value"]
-
-            resposta = shard_b_instancia.debito(data_operacao, conta_cliente, valor_operacao)
-            coordenador_socket.send(resposta.encode('utf-8'))
-        except json.JSONDecodeError as e:
-            # Erro de decodificação JSON
-            coordenador_socket.send(f"Possível erro de comunicação com Server: {str(e)}")
-        finally:
-            coordenador_socket.close()
 
 if __name__ == "__main__":
-    shard_b()
+    
+    # lendo ip do coordenator
+    host = '0.0.0.0'#'coordenador'  
+    port = 9999  
+    
+    shard_b(host, port)

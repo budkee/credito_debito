@@ -1,61 +1,43 @@
 import socket
 import json
 
-def OpClient(data_operacao, conta_cliente, tipo, valor_operacao):
-        
-    request_transacao = {
+def OpClient(data_operacao, conta_cliente, tipo_operacao, valor_operacao):
+    
+    return {
         "data_operacao": data_operacao,
         "conta_cliente": conta_cliente,
-        "tipo": tipo,
+        "tipo_operacao": tipo_operacao,
         "valor_operacao": valor_operacao
     }
 
+def enviar_request(host, port, request):
+    
+    # Comunicação por streamming
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((host, port))
+        s.sendall(json.dumps(request).encode())
+        response = s.recv(1024)
+
+    return response.decode()
+
+
 def main():
     
-    host = 'coordenador'
-    port = 9999
+    # Configuração de comunicação com o coordenador
+    host = '0.0.0.0' #'coordenador'
+    port = 7777
+    
+    # Declara os dados (dá pra adaptar pra input)
+    data_operacao = "22-22-2222"
+    conta_cliente = "001"
+    tipo_operacao = "D"
+    valor_operacao = 1000
+    
+    request = OpClient(data_operacao, conta_cliente, tipo_operacao, valor_operacao)
+    
+    response = enviar_request(host, port, request)
+    print("Resposta do servidor principal:", response)
 
-    # Loop para processar transações na fila continuamente
-    while True:
-        
-        #print(f"Saldo atual: {}")
-
-        data_operacao = "22-22-2222"
-        
-        conta_cliente = "001"
-        
-        tipo = "C"
-        
-        valor_operacao = 1000
-
-
-        operacao = OpClient(data_operacao, conta_cliente, tipo, valor_operacao)
-        
-        try:
-            
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-            client_socket.connect((host, port))
-
-            request = json.dumps({
-                'data': operacao['data_operacao'],
-                'conta_cliente': operacao['conta_cliente'],
-                'tipo': operacao['tipo'],
-                'valor_operacao': operacao['valor_operacao']
-            })
-
-            client_socket.send(request.encode())
-
-            #--------------------------resposta
-            response = client_socket.recv(1024).decode()
-            
-            print(response)
-
-        except socket.error as e:
-            print(f"Erro de comunicação com o servidor: {e}")
-
-        finally:
-            client_socket.close()
 
 if __name__ == "__main__":
     main()

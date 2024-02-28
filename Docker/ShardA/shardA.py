@@ -1,68 +1,45 @@
-# shard_a.py
 import threading
 import socket
-import queue
 import json
 
-class ShardA:
-    def __init__(self):
-        self.queue = queue.Queue()
-        self.saldo = 5000
 
-    def credito(self,data_operacao, conta_cliente, valor_operacao):
+def handle_request(client_socket, address):
+    # Recebe os dados do coordenador
+    data = client_socket.recv(1024).decode()
+    request = json.loads(data)
+    
+    # Puxa os dados de interesse
+    tipo_operacao = request["tipo_operacao"]
+    valor_operacao = request["valor_operacao"]
+    
+    # Simulação de operação de crédito
+    saldo_atualizado = 1000 + valor_operacao
+    
+    # Retorna pro coordenador
+    response = f"OK!\n Saldo atualizado: {saldo_atualizado}"
+    client_socket.send(json.dumps(response).encode())
+    client_socket.close()
+
+
+def shard_a(host, port):
+    
+    # Conexão por streamming
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.bind((host, port))
+        server_socket.listen()
+        print("Servidor shardA escutando em", (host, port))
         
-        self.saldo+=valor_operacao 
-        valores_credito=self.saldo
-
-        resposta_data = {   
-            "status": "OK",
-            "novo_valor_credito": valores_credito
-        }
-
-        self.queue.put(resposta_data)
-        return json.dumps(resposta_data) #retorna valor atualizado da conta
-
-
-
-def shard_a():
-    # lendo ip do coordenator
-    host = '0.0.0.0'#'coordenador'
-    shard_a_host = '0.0.0.0'  
-    shard_a_port = 8888  
-
-    shard_a_instancia = ShardA()
-
-    shard_a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # ver isso aqui!
-
-    shard_a_socket.bind((host, shard_a_port))
-    shard_a_socket.listen()
-
-    print(f"[*] Shard A comunicando-se em {shard_a_host}:{shard_a_port}")
-
-    while True:
-        
-        # Recebendo conexão do Coordenador
-        coordenador_socket, addr = shard_a_socket.accept()
-        print(f"[*] Conexão aceita {addr}")
-
-       
-        request = coordenador_socket.recv(1024).decode('utf-8')
-
-        try:
-            data = json.loads(request)
-            data_operacao = data["data"]
-            conta_cliente = data["conta_cliente"]
-            valor_operacao = data["value"]
-
-            resposta = shard_a_instancia.credito(data_operacao, conta_cliente, valor_operacao)
-            coordenador_socket.send(resposta.encode('utf-8'))
-        except json.JSONDecodeError as e:
-            # Erro de decodificação JSON
-            coordenador_socket.send(f"Possível erro de comunicação com Server: {str(e)}")
-        finally:
-            coordenador_socket.close()
-
+        while True:
+            client_socket, address = server_socket.accept()
+            print(f"[*] Conexão estabelecida com {address[0]}:{address[1]}")
+            client_thread = threading.Thread(target=handle_request, args=(client_socket, address))
+            client_thread.start()
 
 
 if __name__ == "__main__":
-    shard_a()
+    
+    # lendo ip do coordenator
+    host = '0.0.0.0'#'coordenador'
+    port = 8888  
+    
+    shard_a(host, port)

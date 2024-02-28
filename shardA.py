@@ -19,7 +19,7 @@ class ShardA:
         }
 
         self.queue.put(resposta_data)
-        return json.dumps(resposta_data)#retorna valor atualizado da conta
+        return json.dumps(resposta_data) #retorna valor atualizado da conta
 
 def shard_a():
     # lendo ip do coordenator
@@ -35,32 +35,27 @@ def shard_a():
     print(f"[*] Shard A comunicando-se em {shard_a_host}:{shard_a_port}")
 
     while True:
-        # Recebendo coordenador
+        # Recebendo conexão do Coordenador
         coordenador_socket, addr = shard_a_socket.accept()
         print(f"[*] Conexão aceita {addr[0]}:{addr[1]}")
 
-        solicitacao = coordenador_socket.recv(1024).decode('utf-8')
+        request = coordenador_socket.recv(1024).decode('utf-8')
 
         try:
-            data = json.loads(solicitacao)
-            if "operacao" in data and data["operacao"] == "C":
-        
-                data_operacao = data["data"]
-                conta_cliente = data["conta_cliente"]
-                valor_operacao = data["value"]
+            data = json.loads(request)
+            data_operacao = data["data"]
+            conta_cliente = data["conta_cliente"]
+            valor_operacao = data["value"]
 
-                # enviando resposta para coordenador
-                resposta =shard_a_instancia.credito(data_operacao, conta_cliente, valor_operacao)
-                coordenador_socket.send(resposta.encode('utf-8'))
-            else:
-                coordenador_socket.send("Operação Inválida".encode('utf-8'))
-        
+            # Sem verificação de operação, sempre realiza a operação de débito
+            resposta = shard_a_instancia.debito(data_operacao, conta_cliente, valor_operacao)
+            coordenador_socket.send(resposta.encode('utf-8'))
         except json.JSONDecodeError as e:
             # Erro de decodificação JSON
-            coordenador_socket.send(f"Possível erro de comunicação com Server: {str(e)}".encode('utf-8'))
-        
+            coordenador_socket.send(f"Possível erro de comunicação com Server: {str(e)}")
         finally:
             coordenador_socket.close()
+
 
 
 if __name__ == "__main__":

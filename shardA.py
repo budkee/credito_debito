@@ -47,8 +47,7 @@ def shard_a():
             conta_cliente = data["conta_cliente"]
             valor_operacao = data["value"]
 
-            # Sem verificação de operação, sempre realiza a operação de débito
-            resposta = shard_a_instancia.debito(data_operacao, conta_cliente, valor_operacao)
+            resposta = shard_a_instancia.credito(data_operacao, conta_cliente, valor_operacao)
             coordenador_socket.send(resposta.encode('utf-8'))
         except json.JSONDecodeError as e:
             # Erro de decodificação JSON

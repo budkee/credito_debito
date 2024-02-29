@@ -13,3 +13,6 @@ venv/
 # Logs e arquivos de debug
 *.log
 *.log.*
+
+# Arquivos da apple
+.DS_Store

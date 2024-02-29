@@ -1,7 +1,6 @@
 # Use a imagem base Python
 FROM python:3.9-slim
 
-# Diretório de trabalho
 WORKDIR /app
 
 # Copie o código do Cliente para o contêiner

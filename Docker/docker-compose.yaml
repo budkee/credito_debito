@@ -52,6 +52,21 @@ services:
     depends_on:
       - coordenador
     
-networks:
+  #saldo:
 
+    #build: 
+      #context: ./Saldo
+      #dockerfile: Dockerfile
+    
+    #volumes:
+      #- ./Saldo:/app/data
+    #networks:
+      #- mynetwork
+    #depends_on:
+      #- coordenador
+
+networks:
   mynetwork:
+
+#volumes:
+  #saldo_data:

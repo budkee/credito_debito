@@ -1,26 +1,51 @@
 import threading
 import socket
 import json
+import os
 
 
-def handle_request(client_socket, address):
+def handle_request(coord_socket, address):
     # Recebe os dados do coordenador
-    data = client_socket.recv(1024).decode()
+    data = coord_socket.recv(1024).decode()
     request = json.loads(data)
     
     # Puxa os dados de interesse
     tipo_operacao = request["tipo_operacao"]
     valor_operacao = request["valor_operacao"]
-    
-    # Simulação de operação de débito
-    saldo_atualizado = 1000 - valor_operacao
 
-    valor_operacao = saldo_atualizado
+
+    # Obtém o diretório de execução do script
+    diretorio_execucao = os.path.dirname(os.path.abspath(__file__))
     
-    # Retorna pro coordenador
-    response = f"OK!\n Saldo atualizado: {valor_operacao}"
-    client_socket.send(json.dumps(response).encode())
-    client_socket.close()
+    # Define o nome do arquivo
+    nome_arquivo = "saldo.txt"
+    
+    # Cria o caminho completo para o arquivo
+    saldo_file_path = os.path.join(diretorio_execucao, "data", nome_arquivo)
+
+
+    try:
+        # Leitura do arquivo
+        with open(saldo_file_path, "r") as saldo_file:
+            saldo_atual = int(saldo_file.read())
+            novo_saldo = saldo_atual - valor_operacao
+        # Escrita no arquivo
+        with open(saldo_file_path, "w") as saldo_file:
+            saldo_file.write(str(novo_saldo))
+    
+        # Simulação de operação de débito
+        saldo_atualizado = saldo_atual - valor_operacao
+    
+        # Retorna para o coordenador
+        response = f"Ok! Saldo atualizado: {saldo_atualizado}"
+        coord_socket.send(json.dumps(response).encode())
+    
+    except Exception as e:
+        print(f"Erro ao manipular o arquivo {saldo_file_path}: {e}")
+        response = f"Erro ao atualizar saldo: {e}"
+        coord_socket.send(json.dumps(response).encode())
+
+    coord_socket.close()
 
 
 def shard_b(host, port):

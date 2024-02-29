@@ -51,7 +51,8 @@ As melhorias que poderiam ser implementadas são:
 - Realizar a devida atualização do saldo para o cliente
 - Adaptar o código para ser acessado via página Web
 
-## Contribuidores
+## Alunos
 
 - [Isabelle Bicudo](https://github.com/IsabelleBic20)
 - [Kelvisck Cabral](https://github.com/Kelvisck)
+- [Kaê Budke](https://github.com/budkee)

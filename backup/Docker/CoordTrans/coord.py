@@ -9,7 +9,7 @@ class Client:
         self.queue = Queue()
         self.saldo = 0.0 
 
-    def OpClient(self, data_operacao, conta_cliente, tipo, valor_operacao):
+    def OpClient(self, data_operacao, conta_cliente, tipo_operacao, valor_operacao):
         request_transacao = {
             "data_operacao": data_operacao,
             "conta_cliente": conta_cliente,

@@ -3,9 +3,9 @@ import socket
 import json
 
 
-def handle_request(client_socket, address):
+def handle_request(coord_socket, address):
     # Recebe os dados do coordenador
-    data = client_socket.recv(1024).decode()
+    data = coord_socket.recv(1024).decode()
     request = json.loads(data)
     
     # Puxa os dados de interesse

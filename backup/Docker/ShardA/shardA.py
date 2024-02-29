@@ -1,6 +1,7 @@
 import threading
 import socket
 import json
+import os
 
 
 def handle_request(coord_socket, address):
@@ -11,6 +12,26 @@ def handle_request(coord_socket, address):
     # Puxa os dados de interesse
     tipo_operacao = request["tipo_operacao"]
     valor_operacao = request["valor_operacao"]
+
+    print("Diretório atual:", os.getcwd())
+    print("Caminho do arquivo:", os.path.abspath("C:\\Users\\kelvi\\OneDrive\\Documentos\\trabaiCompDist\\credito_debito\\backup\\Docker\\saldo.txt"))
+
+
+    saldo_file_path = "C:\\Users\\kelvi\\OneDrive\\Documentos\\trabaiCompDist\\credito_debito\\backup\\Docker\\saldo.txt"
+
+    try:
+    # Leitura do arquivo
+        with open(saldo_file_path, "r") as saldo_file:
+            saldo_atual = int(saldo_file.read())
+            novo_saldo = saldo_atual + valor_operacao
+
+    # Escrita no arquivo
+        with open(saldo_file_path, "w") as saldo_file:
+            saldo_file.write(str(novo_saldo))
+
+    except Exception as e:
+        print(f"Erro ao manipular o arquivo {saldo_file_path}: {e}")
+
     
     # Simulação de operação de crédito
     saldo_atualizado = 1000 + valor_operacao

@@ -14,9 +14,11 @@ def handle_request(client_socket, address):
     
     # Simulação de operação de débito
     saldo_atualizado = 1000 - valor_operacao
+
+    valor_operacao = saldo_atualizado
     
     # Retorna pro coordenador
-    response = f"OK!\n Saldo atualizado: {saldo_atualizado}"
+    response = f"OK!\n Saldo atualizado: {valor_operacao}"
     client_socket.send(json.dumps(response).encode())
     client_socket.close()
 

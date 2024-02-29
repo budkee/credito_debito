@@ -21,11 +21,7 @@ def enviar_request(host, port, request):
     return response.decode()
 
 
-def main():
-    
-    # Configuração de comunicação com o coordenador
-    host = '0.0.0.0' #'coordenador'
-    port = 7777
+def main(host, port):
     
     # Declara os dados (dá pra adaptar pra input)
     data_operacao = "22-22-2222"
@@ -36,8 +32,8 @@ def main():
     request = OpClient(data_operacao, conta_cliente, tipo_operacao, valor_operacao)
     
     response = enviar_request(host, port, request)
-    print("Resposta do servidor principal:", response)
+    print("Resposta do coordenador:", response)
 
 
 if __name__ == "__main__":
-    main()
+    main('coordenador', 7777)

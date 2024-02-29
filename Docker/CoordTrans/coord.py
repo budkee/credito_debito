@@ -80,16 +80,24 @@ def handle_client_data(client_socket, address, request_queue):
         # Verifica qual é o tipo de operação de interesse ao usuário
         if tipo_operacao == 'C':
             request_queue.put(("shardA", tipo_operacao, valor_operacao))
+            # Obter a resposta do shardA
         
+
         elif tipo_operacao == "D":
             request_queue.put(("shardB", tipo_operacao, valor_operacao))
-        
+            # Obter a resposta do shardB
+            
         else:
             client_socket.send("Tipo de operação inválido".encode())
             client_socket.close()
             return
         
-        response = "OK"
+    
+        # Atualizar o saldo
+        #saldo_atualizado = json.loads(shard_response)['saldo_atualizado']
+
+        # Construir a resposta para o cliente
+        response = f"Transação concluída com sucesso!"
 
         # Enviando resposta de volta para o cliente
         client_socket.send(response.encode('utf-8'))
@@ -111,11 +119,12 @@ def handle_request(request_queue):
             
             if shard == "shardA":
                 
-                response = handle_shards('localhost', 8888, tipo_operacao, valor_operacao)
+                response = handle_shards('shard_a', 8888, tipo_operacao, valor_operacao)
 
             elif shard == "shardB":
 
-                response = handle_shards('localhost', 9999, tipo_operacao, valor_operacao)
+                response = handle_shards('shard_b', 9999, tipo_operacao, valor_operacao)
+
             else:
                 response = "Shard inválido"
             print("Resposta do", shard, ":", response)

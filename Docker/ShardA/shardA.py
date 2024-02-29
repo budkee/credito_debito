@@ -16,9 +16,9 @@ def handle_request(client_socket, address):
     saldo_atualizado = 1000 + valor_operacao
     
     # Retorna pro coordenador
-    response = f"OK!\n Saldo atualizado: {saldo_atualizado}"
-    client_socket.send(json.dumps(response).encode())
-    client_socket.close()
+    response = f"OK! Saldo atual: {saldo_atualizado}"
+    coord_socket.send(json.dumps(response).encode())
+    coord_socket.close()
 
 
 def shard_a(host, port):
@@ -30,16 +30,12 @@ def shard_a(host, port):
         print("Servidor shardA escutando em", (host, port))
         
         while True:
-            client_socket, address = server_socket.accept()
+            coord_socket, address = server_socket.accept()
             print(f"[*] Conexão estabelecida com {address[0]}:{address[1]}")
-            client_thread = threading.Thread(target=handle_request, args=(client_socket, address))
-            client_thread.start()
+            coord_thread = threading.Thread(target=handle_request, args=(coord_socket, address))
+            coord_thread.start()
 
 
 if __name__ == "__main__":
-    
-    # lendo ip do coordenator
-    host = '0.0.0.0'#'coordenador'
-    port = 8888  
-    
-    shard_a(host, port)
+
+    shard_a('0.0.0.0', 8888)

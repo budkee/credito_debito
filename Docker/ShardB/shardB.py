@@ -30,16 +30,12 @@ def shard_b(host, port):
         print("Servidor shardB escutando em", (host, port))
         
         while True:
-            client_socket, address = server_socket.accept()
+            coord_socket, address = server_socket.accept()
             print(f"[*] Conexão estabelecida com {address[0]}:{address[1]}")
-            client_thread = threading.Thread(target=handle_request, args=(client_socket, address))
-            client_thread.start()
+            coord_thread = threading.Thread(target=handle_request, args=(coord_socket, address))
+            coord_thread.start()
 
 
 if __name__ == "__main__":
     
-    # lendo ip do coordenator
-    host = '0.0.0.0'#'coordenador'  
-    port = 9999  
-    
-    shard_b(host, port)
+    shard_b('0.0.0.0', 9999)

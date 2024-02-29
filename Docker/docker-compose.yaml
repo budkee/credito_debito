@@ -11,9 +11,9 @@ services:
     depends_on:
       - coordenador
     volumes:
-      - ./Client:/Client
+      - ./Client:/app
     deploy:
-      replicas: 4
+      replicas: 1
 
   coordenador:
 
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
     
     volumes:
-      - ./CoordTrans:/CoordTrans
+      - ./CoordTrans:/app
     networks:
       - mynetwork
 
@@ -33,7 +33,7 @@ services:
       dockerfile: Dockerfile
     
     volumes:
-      - ./ShardA:/ShardA
+      - ./ShardA:/app
     networks:
       - mynetwork
     depends_on:
@@ -46,7 +46,7 @@ services:
       dockerfile: Dockerfile
     
     volumes:
-      - ./ShardB:/ShardB
+      - ./ShardB:/app
     networks:
       - mynetwork
     depends_on:

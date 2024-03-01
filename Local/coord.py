@@ -32,6 +32,29 @@ def start_server(host, port):
             client_thread = threading.Thread(target=handle_client_data, args=(client_socket, address, request_queue))
             client_thread.start()
 
+#-------Função-para-Lidar-com-as-Requisições--------
+def handle_request(request_queue):
+
+    while True:
+        
+        if not request_queue.empty():
+
+            shard, tipo_operacao, valor_operacao = request_queue.get()
+            
+            if shard == "shardA":
+                
+                response = handle_shards('0.0.0.0', 8888, tipo_operacao, valor_operacao)
+                
+            elif shard == "shardB":
+
+                response = handle_shards('0.0.0.0', 9999, tipo_operacao, valor_operacao)
+
+            else:
+                response = "Shard inválido"
+            
+            print(response) # Resposta do shard correspondente
+
+
 #-------Função-para-Lidar-com-Shards--------
 def handle_shards(host, port, tipo_operacao, valor_operacao):
     
@@ -39,7 +62,7 @@ def handle_shards(host, port, tipo_operacao, valor_operacao):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((host, port))
 
-        saldo_atual = 1000
+        saldo_atual = 1000 
 
         request = {
             "tipo_operacao": tipo_operacao,
@@ -49,6 +72,7 @@ def handle_shards(host, port, tipo_operacao, valor_operacao):
         s.sendall(json.dumps(request).encode())
         response = s.recv(1024)
     return response.decode()
+
 
 #-------Função-para-Lidar-com-os-dados-do-Clientes--------
 def handle_client_data(client_socket, address, request_queue):
@@ -96,27 +120,7 @@ def handle_client_data(client_socket, address, request_queue):
     except json.JSONDecodeError:
         response = "Erro ao decodificar JSON."
 
-#-------Função-para-Lidar-com-as-Requisições--------
-def handle_request(request_queue):
 
-    while True:
-        
-        if not request_queue.empty():
-
-            shard, tipo_operacao, valor_operacao = request_queue.get()
-            
-            if shard == "shardA":
-                
-                response = handle_shards('shard_a', 8888, tipo_operacao, valor_operacao)
-                
-            elif shard == "shardB":
-
-                response = handle_shards('shard_b', 9999, tipo_operacao, valor_operacao)
-
-            else:
-                response = "Shard inválido"
-            
-            print(response) # Resposta do shard correspondente
             
 
 #-------Módulo-Principal--------

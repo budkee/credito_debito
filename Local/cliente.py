@@ -29,12 +29,13 @@ def main(host, port):
     tipo_operacao = "D"
     valor_operacao = 1000
     
+    # Envio para o coordenador
     request = OpClient(data_operacao, conta_cliente, tipo_operacao, valor_operacao)
-    
+    # Resposta do coordenador
     response = enviar_request(host, port, request)
     print("Resposta do coordenador:", response)
 
 
 if __name__ == "__main__":
     
-    main('coordenador', 7777)
+    main('0.0.0.0', 7777)

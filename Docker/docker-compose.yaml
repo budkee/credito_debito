@@ -13,7 +13,7 @@ services:
     volumes:
       - ./Client:/app
     deploy:
-      replicas: 1
+      replicas: 5
 
   coordenador:
 
